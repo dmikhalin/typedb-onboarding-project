@@ -22,17 +22,13 @@ load("@rules_jvm_external//:defs.bzl", "maven_install")
 
 maven_install(
     artifacts = [
-#        "junit:junit:4.12",
-#        "androidx.test.espresso:espresso-core:3.1.1",
-#        "org.hamcrest:hamcrest-library:1.3",
         "com.vaticle.typedb:typedb-client:2.16.1",
         "com.vaticle.typeql:typeql-lang:2.14.0",
     ],
     repositories = [
         # Private repositories are supported through HTTP Basic auth
-#        "http://username:password@localhost:8081/artifactory/my-repository",
-#        "https://maven.google.com",
-#        "https://repo1.maven.org/maven2",
+        "https://maven.google.com",
+        "https://repo1.maven.org/maven2",
         "https://repo.vaticle.com/repository/maven/",
     ],
 )
