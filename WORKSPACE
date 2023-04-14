@@ -26,7 +26,6 @@ maven_install(
         "com.vaticle.typeql:typeql-lang:2.14.0",
     ],
     repositories = [
-        # Private repositories are supported through HTTP Basic auth
         "https://maven.google.com",
         "https://repo1.maven.org/maven2",
         "https://repo.vaticle.com/repository/maven/",
