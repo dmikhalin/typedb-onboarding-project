@@ -1,0 +1,101 @@
+define
+
+### Attributes ###
+
+name sub attribute,
+    value string;
+    
+email sub attribute,
+    value string;
+
+school-year sub attribute,
+    value string;
+
+graduate-year sub attribute,
+    value long;
+
+title sub attribute,
+    value string;
+
+level sub attribute,
+    value string;
+
+rank sub attribute,
+    value long;
+
+score sub attribute,
+    value long;
+
+id sub attribute,
+    value long;
+    
+
+### Entities ###
+
+person sub entity, 
+    abstract,
+    owns id @key,
+    owns name,
+    owns email;
+  
+student sub person,
+    owns graduate-year,
+    plays membership:member,
+    plays participation:participant,
+    plays prize-winning:winner;
+    
+teacher sub person,
+    plays teaching:teacher;
+
+group sub entity,
+    owns id @key,
+    owns title,
+    owns school-year,
+    plays membership:group,
+    plays teaching:group;
+
+olympiad sub entity,
+    owns school-year,
+    owns title,
+    owns level,
+    plays participation:olympiad,
+    plays prize-winning:olympiad;
+
+result sub entity,
+    owns title @key,
+    owns rank,
+    plays participation:result;
+
+
+### Relations ###
+
+membership sub relation,
+    relates member,
+    relates group;
+    
+teaching sub relation,
+    relates teacher,
+    relates group;
+
+participation sub relation,
+    owns score,
+    relates participant,
+    relates olympiad,
+    relates result;
+
+prize-winning sub relation,
+    relates winner,
+    relates olympiad;
+
+
+### Rules ###
+
+rule define-prize-winners: when {
+    $p(participant: $s, olympiad: $o, result: $r) isa participation;
+    $r has $rank;
+    $rank isa rank;
+    $rank > 0;
+} then {
+    (winner: $s, olympiad: $o) isa prize-winning;
+};
+
