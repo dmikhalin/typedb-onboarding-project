@@ -27,7 +27,7 @@ score sub attribute,
     value long;
 
 id sub attribute,
-    value long;
+    value string;
     
 
 ### Entities ###
