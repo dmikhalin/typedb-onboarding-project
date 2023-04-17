@@ -99,7 +99,7 @@ public class DataLoader {
                 return "";
             String typeQLInsertQuery = "insert $r isa result";
             typeQLInsertQuery += ", has title " + result.at("title");
-            typeQLInsertQuery += ", has rank " + result.at("rank");
+            typeQLInsertQuery += ", has rank " + result.at("rank").asLong();
             typeQLInsertQuery += ";";
             return typeQLInsertQuery;
         }
@@ -147,7 +147,7 @@ public class DataLoader {
         inputs.add(new StudentInput("students.csv"));
         inputs.add(new TeacherInput("teachers.csv"));
         inputs.add(new GroupsInput("groups.csv"));
-//        inputs.add(new ResultsInput("results.csv"));
+        inputs.add(new ResultsInput("results.csv"));
         return inputs;
     }
 
