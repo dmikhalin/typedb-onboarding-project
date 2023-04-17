@@ -7,7 +7,6 @@ import com.vaticle.typedb.client.api.TypeDBSession;
 import com.vaticle.typedb.client.TypeDB;
 import com.vaticle.typedb.client.api.TypeDBTransaction;
 import com.vaticle.typedb.client.api.answer.ConceptMap;
-import com.vaticle.typedb.client.common.exception.TypeDBClientException;
 import com.vaticle.typeql.lang.TypeQL;
 import static com.vaticle.typeql.lang.TypeQL.*;
 
@@ -105,6 +104,39 @@ public class DataLoader {
         }
     }
 
+    static class OlympiadsInput extends Input {
+        public OlympiadsInput(String path) {
+            super(path);
+        }
+
+        String template(Json result) {
+            if (result.at("title").isNull())
+                return "";
+            String typeQLInsertQuery = "insert $o isa olympiad";
+            typeQLInsertQuery += ", has title " + result.at("title");
+            typeQLInsertQuery += ", has school-year " + result.at("school-year");
+            typeQLInsertQuery += ", has level " + result.at("level");
+            typeQLInsertQuery += ";";
+            return typeQLInsertQuery;
+        }
+    }
+
+    static class MembershipInput extends Input {
+        public MembershipInput(String path) {
+            super(path);
+        }
+
+        String template(Json result) {
+            if (result.at("title").isNull())
+                return "";
+            String typeQLInsertQuery = "insert $o isa olympiad";
+            typeQLInsertQuery += ", has title " + result.at("title");
+            typeQLInsertQuery += ", has school-year " + result.at("school-year");
+            typeQLInsertQuery += ", has level " + result.at("level");
+            typeQLInsertQuery += ";";
+            return typeQLInsertQuery;
+        }
+    }
     public static void main(String[] args) throws FileNotFoundException {
         String databaseName = "achievements";
         String databaseAddress = "localhost:1729";
@@ -148,6 +180,8 @@ public class DataLoader {
         inputs.add(new TeacherInput("teachers.csv"));
         inputs.add(new GroupsInput("groups.csv"));
         inputs.add(new ResultsInput("results.csv"));
+        inputs.add(new OlympiadsInput("olympiads.csv"));
+        inputs.add(new OlympiadsInput("membership.csv"));
         return inputs;
     }
 
