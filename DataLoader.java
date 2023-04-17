@@ -89,34 +89,40 @@ public class DataLoader {
         }
     }
 
+    static class ResultsInput extends Input {
+        public ResultsInput(String path) {
+            super(path);
+        }
+
+        String template(Json result) {
+            if (result.at("title").isNull())
+                return "";
+            String typeQLInsertQuery = "insert $r isa result";
+            typeQLInsertQuery += ", has title " + result.at("title");
+            typeQLInsertQuery += ", has rank " + result.at("rank");
+            typeQLInsertQuery += ";";
+            return typeQLInsertQuery;
+        }
+    }
+
     public static void main(String[] args) throws FileNotFoundException {
         String databaseName = "achievements";
         String databaseAddress = "localhost:1729";
 
         Collection<Input> inputs = initialiseInputs();
 
-        try {
-            TypeDBClient client = TypeDB.coreClient(databaseAddress);
-            try {
-                TypeDBSession session = client.session(databaseName, TypeDBSession.Type.DATA);
-                if (! isDatabaseEmpty(session)) {
-                    clearDatabase(session);
-                }
-
-                for (Input input : inputs) {
-                    System.out.println("Loading from [" + input.getDataPath() + ".csv] into TypeDB ...");
-                    loadDataIntoTypeDB(input, session);
-                }
-
-                session.close();
+        TypeDBClient client = TypeDB.coreClient(databaseAddress);
+        try (TypeDBSession session = client.session(databaseName, TypeDBSession.Type.DATA)) {
+            if (! isDatabaseEmpty(session)) {
+                clearDatabase(session);
             }
-            catch (TypeDBClientException e) {
-                System.out.println("Database " + databaseName + " not found.");
+
+            for (Input input : inputs) {
+                System.out.println("Loading from [" + input.getDataPath() + ".csv] into TypeDB ...");
+                loadDataIntoTypeDB(input, session);
             }
-            client.close();
-        } catch (TypeDBClientException e) {
-            System.out.println("Can't connect to the TypeDB server " + databaseAddress);
         }
+        client.close();
 
     }
 
@@ -129,10 +135,11 @@ public class DataLoader {
     }
 
     private static void clearDatabase(TypeDBSession session) {
-        TypeDBTransaction transaction = session.transaction(TypeDBTransaction.Type.WRITE);
-        TypeQLDelete query = TypeQL.match(var("t").isa("thing")).delete(var("t").isa("thing"));
-        transaction.query().delete(query);
-        transaction.commit();
+        try (TypeDBTransaction transaction = session.transaction(TypeDBTransaction.Type.WRITE)) {
+            TypeQLDelete query = TypeQL.match(var("t").isa("thing")).delete(var("t").isa("thing"));
+            transaction.query().delete(query);
+            transaction.commit();
+        }
     }
 
     private static Collection<Input> initialiseInputs() {
@@ -140,17 +147,19 @@ public class DataLoader {
         inputs.add(new StudentInput("students.csv"));
         inputs.add(new TeacherInput("teachers.csv"));
         inputs.add(new GroupsInput("groups.csv"));
+//        inputs.add(new ResultsInput("results.csv"));
         return inputs;
     }
 
     static void loadDataIntoTypeDB(Input input, TypeDBSession session) throws FileNotFoundException {
         ArrayList<Json> items = parseDataToJson(input);
         for (Json item : items) {
-            TypeDBTransaction transaction = session.transaction(TypeDBTransaction.Type.WRITE);
-            String typeQLInsertQuery = input.template(item);
-            System.out.println("Executing TypeQL Query: " + typeQLInsertQuery);
-            transaction.query().insert(TypeQL.parseQuery(typeQLInsertQuery).asInsert());
-            transaction.commit();
+            try (TypeDBTransaction transaction = session.transaction(TypeDBTransaction.Type.WRITE)) {
+                String typeQLInsertQuery = input.template(item);
+                System.out.println("Executing TypeQL Query: " + typeQLInsertQuery);
+                transaction.query().insert(TypeQL.parseQuery(typeQLInsertQuery).asInsert());
+                transaction.commit();
+            }
         }
         System.out.println("\nInserted " + items.size() + " items from [ " + input.getDataPath() + ".csv] into TypeDB.\n");
     }
