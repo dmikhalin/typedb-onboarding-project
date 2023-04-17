@@ -85,18 +85,29 @@ public class DataLoader {
     public static void main(String[] args) throws FileNotFoundException {
         String databaseName = "achievements";
         String databaseAddress = "localhost:1729";
+
         Collection<Input> inputs = initialiseInputs();
 
-        TypeDBClient client = TypeDB.coreClient(databaseAddress);
-        TypeDBSession session = client.session(databaseName, TypeDBSession.Type.DATA);
+        try {
+            TypeDBClient client = TypeDB.coreClient(databaseAddress);
+            try {
+                TypeDBSession session = client.session(databaseName, TypeDBSession.Type.DATA);
 
-        for (Input input : inputs) {
-            System.out.println("Loading from [" + input.getDataPath() + ".csv] into TypeDB ...");
-            loadDataIntoTypeDB(input, session);
+                for (Input input : inputs) {
+                    System.out.println("Loading from [" + input.getDataPath() + ".csv] into TypeDB ...");
+                    loadDataIntoTypeDB(input, session);
+                }
+
+                session.close();
+            }
+            catch (Exception e) {
+                System.out.println("Database " + databaseName + " not found.");
+            }
+            client.close();
+        } catch (Exception e) {
+            System.out.println("Can't connect to the TypeDB server " + databaseAddress);
         }
 
-        session.close();
-        client.close();
     }
 
     private static Collection<Input> initialiseInputs() {
