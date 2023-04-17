@@ -5,6 +5,7 @@ java_binary(
     deps = [
         "@maven//:com_vaticle_typedb_typedb_client_2_16_1",
         "@maven//:com_vaticle_typeql_typeql_lang_2_14_0",
+        "@maven//:com_vaticle_typeql_typeql_query",
 #        "@maven//:client-java",
 #        "@maven//java:typeql-lang",
 #        "@maven//api",

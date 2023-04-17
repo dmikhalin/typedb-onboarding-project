@@ -6,7 +6,13 @@ import com.vaticle.typedb.client.api.TypeDBClient;
 import com.vaticle.typedb.client.api.TypeDBSession;
 import com.vaticle.typedb.client.TypeDB;
 import com.vaticle.typedb.client.api.TypeDBTransaction;
+import com.vaticle.typedb.client.api.answer.ConceptMap;
+import com.vaticle.typedb.client.common.exception.TypeDBClientException;
 import com.vaticle.typeql.lang.TypeQL;
+import static com.vaticle.typeql.lang.TypeQL.*;
+
+import com.vaticle.typeql.lang.query.TypeQLDelete;
+import com.vaticle.typeql.lang.query.TypeQLMatch;
 import mjson.Json;
 
 import java.io.FileInputStream;
@@ -14,6 +20,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.stream.Stream;
 
 public class DataLoader {
     abstract static class Input {
@@ -92,6 +99,9 @@ public class DataLoader {
             TypeDBClient client = TypeDB.coreClient(databaseAddress);
             try {
                 TypeDBSession session = client.session(databaseName, TypeDBSession.Type.DATA);
+                if (! isDatabaseEmpty(session)) {
+                    clearDatabase(session);
+                }
 
                 for (Input input : inputs) {
                     System.out.println("Loading from [" + input.getDataPath() + ".csv] into TypeDB ...");
@@ -100,20 +110,35 @@ public class DataLoader {
 
                 session.close();
             }
-            catch (Exception e) {
+            catch (TypeDBClientException e) {
                 System.out.println("Database " + databaseName + " not found.");
             }
             client.close();
-        } catch (Exception e) {
+        } catch (TypeDBClientException e) {
             System.out.println("Can't connect to the TypeDB server " + databaseAddress);
         }
 
     }
 
+    private static boolean isDatabaseEmpty(TypeDBSession session) {
+        try (TypeDBTransaction readTransaction = session.transaction(TypeDBTransaction.Type.READ)) {
+            TypeQLMatch.Limited getQuery = TypeQL.match(var("t").isa("thing")).get("t").limit(1);
+            Stream<ConceptMap> answers = readTransaction.query().match(getQuery);
+            return ! answers.findAny().isPresent();
+        }
+    }
+
+    private static void clearDatabase(TypeDBSession session) {
+        TypeDBTransaction transaction = session.transaction(TypeDBTransaction.Type.WRITE);
+        TypeQLDelete query = TypeQL.match(var("t").isa("thing")).delete(var("t").isa("thing"));
+        transaction.query().delete(query);
+        transaction.commit();
+    }
+
     private static Collection<Input> initialiseInputs() {
         Collection<Input> inputs = new ArrayList<>();
-//        inputs.add(new StudentInput("students.csv"));
-//        inputs.add(new TeacherInput("teachers.csv"));
+        inputs.add(new StudentInput("students.csv"));
+        inputs.add(new TeacherInput("teachers.csv"));
         inputs.add(new GroupsInput("groups.csv"));
         return inputs;
     }
