@@ -65,6 +65,23 @@ public class DataLoader {
         }
     }
 
+    static class GroupsInput extends Input {
+        public GroupsInput(String path) {
+            super(path);
+        }
+
+        String template(Json group) {
+            if (group.at("id").isNull())
+                return "";
+            String typeQLInsertQuery = "insert $g isa group";
+            typeQLInsertQuery += ", has id " + group.at("id");
+            typeQLInsertQuery += ", has title " + group.at("title");
+            typeQLInsertQuery += ", has school-year " + group.at("school-year");
+            typeQLInsertQuery += ";";
+            return typeQLInsertQuery;
+        }
+    }
+
     public static void main(String[] args) throws FileNotFoundException {
         String databaseName = "achievements";
         String databaseAddress = "localhost:1729";
@@ -84,8 +101,9 @@ public class DataLoader {
 
     private static Collection<Input> initialiseInputs() {
         Collection<Input> inputs = new ArrayList<>();
-        inputs.add(new StudentInput("students.csv"));
-        inputs.add(new TeacherInput("teachers.csv"));
+//        inputs.add(new StudentInput("students.csv"));
+//        inputs.add(new TeacherInput("teachers.csv"));
+        inputs.add(new GroupsInput("groups.csv"));
         return inputs;
     }
 
