@@ -24,6 +24,8 @@ maven_install(
     artifacts = [
         "com.vaticle.typedb:typedb-client:2.16.1",
         "com.vaticle.typeql:typeql-lang:2.14.0",
+        "org.sharegov:mjson:1.4.1",
+        "com.univocity:univocity-parsers:2.9.1",
     ],
     repositories = [
         "https://maven.google.com",
