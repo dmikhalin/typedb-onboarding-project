@@ -133,6 +133,22 @@ public class DataLoader {
             return typeQLInsertQuery;
         }
     }
+
+    static class TeachingInput extends Input {
+        public TeachingInput(String path) {
+            super(path);
+        }
+
+        String template(Json item) {
+            if (item.at("teacher_id").isNull())
+                return "";
+            String typeQLInsertQuery = "match $t isa teacher, has id " + item.at("teacher_id") + ";\n";
+            typeQLInsertQuery += "$g isa group, has id " + item.at("group_id") + ";\n";
+            typeQLInsertQuery += "insert (group: $g, teacher: $t) isa teaching;";
+            return typeQLInsertQuery;
+        }
+    }
+
     public static void main(String[] args) throws FileNotFoundException {
         String databaseName = "achievements";
         String databaseAddress = "localhost:1729";
@@ -179,6 +195,7 @@ public class DataLoader {
         inputs.add(new ResultsInput("results.csv"));
         inputs.add(new OlympiadsInput("olympiads.csv"));
         inputs.add(new MembershipInput("membership.csv"));
+        inputs.add(new TeachingInput("teaching.csv"));
         return inputs;
     }
 
@@ -188,8 +205,10 @@ public class DataLoader {
             try (TypeDBTransaction transaction = session.transaction(TypeDBTransaction.Type.WRITE)) {
                 String typeQLInsertQuery = input.template(item);
 //                System.out.println("Executing TypeQL Query: " + typeQLInsertQuery);
-                transaction.query().insert(TypeQL.parseQuery(typeQLInsertQuery).asInsert());
-                transaction.commit();
+                if (! typeQLInsertQuery.isEmpty()) {
+                    transaction.query().insert(TypeQL.parseQuery(typeQLInsertQuery).asInsert());
+                    transaction.commit();
+                }
             }
         }
         System.out.println("\nInserted " + items.size() + " items from [ " + input.getDataPath() + ".csv] into TypeDB.\n");
