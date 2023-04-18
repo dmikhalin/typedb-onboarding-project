@@ -16,6 +16,8 @@ java_binary(
     data = [
         "//:data-csv",
     ],
+    resources = ["//resources:logback.xml"],
+    resource_strip_prefix = "resources",
 )
 
 filegroup(
