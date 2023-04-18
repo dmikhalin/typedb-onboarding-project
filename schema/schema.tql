@@ -28,6 +28,9 @@ score sub attribute,
 
 id sub attribute,
     value string;
+
+grade sub attribute,
+    value long;
     
 
 ### Entities ###
@@ -79,13 +82,17 @@ teaching sub relation,
 
 participation sub relation,
     owns score,
+    owns grade,
     relates participant,
     relates olympiad,
-    relates result;
+    relates result,
+    plays prize-winning:participation;
 
 prize-winning sub relation,
+    owns grade,
     relates winner,
-    relates olympiad;
+    relates olympiad,
+    relates participation;
 
 
 ### Rules ###
@@ -95,7 +102,8 @@ rule define-prize-winners: when {
     $r has $rank;
     $rank isa rank;
     $rank > 0;
+    $p has grade $grade;
 } then {
-    (winner: $s, olympiad: $o) isa prize-winning;
+    (winner: $s, olympiad: $o, participation: $p) isa prize-winning;
 };
 

@@ -165,6 +165,7 @@ public class DataLoader {
             if (! item.at("score").isNull()) {
                 typeQLInsertQuery += ", has score " + item.at("score").asLong();
             }
+            typeQLInsertQuery += ", has grade " + item.at("grade").asLong();
             typeQLInsertQuery += ";";
             return typeQLInsertQuery;
         }
@@ -198,7 +199,7 @@ public class DataLoader {
     private static void defineSchema(String databaseName, String schemaFileName, TypeDBClient client) {
         try (TypeDBSession session = client.session(databaseName, TypeDBSession.Type.SCHEMA)) {
             try (TypeDBTransaction transaction = session.transaction(TypeDBTransaction.Type.WRITE)) {
-                String typeQLSchemaQuery = Files.readString(Paths.get(schemaFileName));;
+                String typeQLSchemaQuery = Files.readString(Paths.get(schemaFileName));
                 System.out.println("Defining schema...");
                 transaction.query().define(TypeQL.parseQuery(typeQLSchemaQuery).asDefine());
                 transaction.commit();
@@ -235,7 +236,6 @@ public class DataLoader {
         for (Json item : items) {
             try (TypeDBTransaction transaction = session.transaction(TypeDBTransaction.Type.WRITE)) {
                 String typeQLInsertQuery = input.template(item);
-//                System.out.println("Executing TypeQL Query: " + typeQLInsertQuery);
                 if (! typeQLInsertQuery.isEmpty()) {
                     transaction.query().insert(TypeQL.parseQuery(typeQLInsertQuery).asInsert());
                     transaction.commit();
