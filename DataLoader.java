@@ -6,20 +6,18 @@ import com.vaticle.typedb.client.api.TypeDBClient;
 import com.vaticle.typedb.client.api.TypeDBSession;
 import com.vaticle.typedb.client.TypeDB;
 import com.vaticle.typedb.client.api.TypeDBTransaction;
-import com.vaticle.typedb.client.api.answer.ConceptMap;
 import com.vaticle.typeql.lang.TypeQL;
-import static com.vaticle.typeql.lang.TypeQL.*;
 
-import com.vaticle.typeql.lang.query.TypeQLDelete;
-import com.vaticle.typeql.lang.query.TypeQLMatch;
 import mjson.Json;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.stream.Stream;
 
 public class DataLoader {
     abstract static class Input {
@@ -175,38 +173,47 @@ public class DataLoader {
     public static void main(String[] args) throws FileNotFoundException {
         String databaseName = "achievements";
         String databaseAddress = "localhost:1729";
+        String schemaFileName = "schema/schema.tql";
 
         Collection<Input> inputs = initialiseInputs();
 
         TypeDBClient client = TypeDB.coreClient(databaseAddress);
-        try (TypeDBSession session = client.session(databaseName, TypeDBSession.Type.DATA)) {
-            if (! isDatabaseEmpty(session)) {
-                System.out.println("Database is not empty, let us clear it...");
-                clearDatabase(session);
-            }
 
-            for (Input input : inputs) {
-                System.out.println("Loading from [" + input.getDataPath() + "] into TypeDB ...");
-                loadDataIntoTypeDB(input, session);
-            }
-        }
+        createDatabase(databaseName, client);
+        defineSchema(databaseName, schemaFileName, client);
+        loadAllData(databaseName, inputs, client);
+
         client.close();
 
     }
 
-    private static boolean isDatabaseEmpty(TypeDBSession session) {
-        try (TypeDBTransaction readTransaction = session.transaction(TypeDBTransaction.Type.READ)) {
-            TypeQLMatch.Limited getQuery = TypeQL.match(var("t").isa("thing")).get("t").limit(1);
-            Stream<ConceptMap> answers = readTransaction.query().match(getQuery);
-            return ! answers.findAny().isPresent();
+    private static void createDatabase(String databaseName, TypeDBClient client) {
+        if (client.databases().contains(databaseName)) {
+            System.out.println("Database '" + databaseName + "' exists, recreating...");
+            client.databases().get(databaseName).delete();
+            client.databases().create(databaseName);
         }
     }
 
-    private static void clearDatabase(TypeDBSession session) {
-        try (TypeDBTransaction transaction = session.transaction(TypeDBTransaction.Type.WRITE)) {
-            TypeQLDelete query = TypeQL.match(var("t").isa("thing")).delete(var("t").isa("thing"));
-            transaction.query().delete(query);
-            transaction.commit();
+    private static void defineSchema(String databaseName, String schemaFileName, TypeDBClient client) {
+        try (TypeDBSession session = client.session(databaseName, TypeDBSession.Type.SCHEMA)) {
+            try (TypeDBTransaction transaction = session.transaction(TypeDBTransaction.Type.WRITE)) {
+                String typeQLSchemaQuery = Files.readString(Paths.get(schemaFileName));;
+                System.out.println("Defining schema...");
+                transaction.query().define(TypeQL.parseQuery(typeQLSchemaQuery).asDefine());
+                transaction.commit();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private static void loadAllData(String databaseName, Collection<Input> inputs, TypeDBClient client) throws FileNotFoundException {
+        try (TypeDBSession session = client.session(databaseName, TypeDBSession.Type.DATA)) {
+            for (Input input : inputs) {
+                System.out.println("Loading from [" + input.getDataPath() + "] into TypeDB ...");
+                loadDataIntoTypeDB(input, session);
+            }
         }
     }
 

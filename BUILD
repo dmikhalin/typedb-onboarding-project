@@ -15,6 +15,7 @@ java_binary(
     ],
     data = [
         "//:data-csv",
+        "//:schema",
     ],
     resources = ["//resources:logback.xml"],
     resource_strip_prefix = "resources",
@@ -23,5 +24,11 @@ java_binary(
 filegroup(
     name = "data-csv",
     srcs = glob(["data/*.csv"]),
+    visibility = ["//visibility:public"]
+)
+
+filegroup(
+    name = "schema",
+    srcs = glob(["schema/*.tql"]),
     visibility = ["//visibility:public"]
 )
