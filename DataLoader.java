@@ -126,14 +126,10 @@ public class DataLoader {
             super(path);
         }
 
-        String template(Json result) {
-            if (result.at("title").isNull())
-                return "";
-            String typeQLInsertQuery = "insert $o isa olympiad";
-            typeQLInsertQuery += ", has title " + result.at("title");
-            typeQLInsertQuery += ", has school-year " + result.at("school-year");
-            typeQLInsertQuery += ", has level " + result.at("level");
-            typeQLInsertQuery += ";";
+        String template(Json item) {
+            String typeQLInsertQuery = "match $s isa student, has id " + item.at("student_id") + ";\n";
+            typeQLInsertQuery += "$g isa group, has id " + item.at("group_id") + ";\n";
+            typeQLInsertQuery += "insert (member: $s, group: $g) isa membership;";
             return typeQLInsertQuery;
         }
     }
@@ -146,6 +142,7 @@ public class DataLoader {
         TypeDBClient client = TypeDB.coreClient(databaseAddress);
         try (TypeDBSession session = client.session(databaseName, TypeDBSession.Type.DATA)) {
             if (! isDatabaseEmpty(session)) {
+                System.out.println("Database is not empty, let us clear it...");
                 clearDatabase(session);
             }
 
@@ -181,7 +178,7 @@ public class DataLoader {
         inputs.add(new GroupsInput("groups.csv"));
         inputs.add(new ResultsInput("results.csv"));
         inputs.add(new OlympiadsInput("olympiads.csv"));
-        inputs.add(new OlympiadsInput("membership.csv"));
+        inputs.add(new MembershipInput("membership.csv"));
         return inputs;
     }
 
@@ -190,7 +187,7 @@ public class DataLoader {
         for (Json item : items) {
             try (TypeDBTransaction transaction = session.transaction(TypeDBTransaction.Type.WRITE)) {
                 String typeQLInsertQuery = input.template(item);
-                System.out.println("Executing TypeQL Query: " + typeQLInsertQuery);
+//                System.out.println("Executing TypeQL Query: " + typeQLInsertQuery);
                 transaction.query().insert(TypeQL.parseQuery(typeQLInsertQuery).asInsert());
                 transaction.commit();
             }
