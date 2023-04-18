@@ -149,6 +149,29 @@ public class DataLoader {
         }
     }
 
+    static class ParticipationInput extends Input {
+        public ParticipationInput(String path) {
+            super(path);
+        }
+
+        String template(Json item) {
+            String typeQLInsertQuery = "match $o isa olympiad, has title " + item.at("olympiad") + ";\n";
+            typeQLInsertQuery += "$s isa student, has id " + item.at("student_id") + ";\n";
+            if (! item.at("result").isNull()) {
+                typeQLInsertQuery += "$r isa result, has title " + item.at("result") + ";\n";
+                typeQLInsertQuery += "insert (olympiad: $o, participant: $s, result: $r) isa participation";
+            }
+            else {
+                typeQLInsertQuery += "insert (olympiad: $o, participant: $s) isa participation";
+            }
+            if (! item.at("score").isNull()) {
+                typeQLInsertQuery += ", has score " + item.at("score").asLong();
+            }
+            typeQLInsertQuery += ";";
+            return typeQLInsertQuery;
+        }
+    }
+
     public static void main(String[] args) throws FileNotFoundException {
         String databaseName = "achievements";
         String databaseAddress = "localhost:1729";
@@ -163,7 +186,7 @@ public class DataLoader {
             }
 
             for (Input input : inputs) {
-                System.out.println("Loading from [" + input.getDataPath() + ".csv] into TypeDB ...");
+                System.out.println("Loading from [" + input.getDataPath() + "] into TypeDB ...");
                 loadDataIntoTypeDB(input, session);
             }
         }
@@ -196,6 +219,7 @@ public class DataLoader {
         inputs.add(new OlympiadsInput("olympiads.csv"));
         inputs.add(new MembershipInput("membership.csv"));
         inputs.add(new TeachingInput("teaching.csv"));
+        inputs.add(new ParticipationInput("participation.csv"));
         return inputs;
     }
 
@@ -211,7 +235,7 @@ public class DataLoader {
                 }
             }
         }
-        System.out.println("\nInserted " + items.size() + " items from [ " + input.getDataPath() + ".csv] into TypeDB.\n");
+        System.out.println("\nInserted " + items.size() + " items from [" + input.getDataPath() + "] into TypeDB.\n");
     }
 
     static ArrayList<Json> parseDataToJson(Input input) throws FileNotFoundException {
