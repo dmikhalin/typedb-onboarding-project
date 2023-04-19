@@ -47,49 +47,25 @@ public class DataLoaderTest {
         }
     }
 
+    static class TestQuantity extends TestExampleLong {
+        public TestQuantity(String entity, long result) {
+            super("Number of " + entity + "s",
+                    "match $x isa " + entity + "; get $x; count;",
+                    result);
+        }
+    }
+
     @Test
     public void assertMigrationResults() {
-        Collection<TestExampleLong> testExamples = new ArrayList<>();
-        testExamples.add(new TestExampleLong(
-                "Number of students",
-                "match $x isa student; get $x; count;",
-                915
-        ));
-        testExamples.add(new TestExampleLong(
-                "Number of teachers",
-                "match $x isa teacher; get $x; count;",
-                11
-        ));
-        testExamples.add(new TestExampleLong(
-                "Number of groups",
-                "match $x isa group; get $x; count;",
-                190
-        ));
-        testExamples.add(new TestExampleLong(
-                "Number of results",
-                "match $x isa result; get $x; count;",
-                10
-        ));
-        testExamples.add(new TestExampleLong(
-                "Number of olympiads",
-                "match $x isa olympiad; get $x; count;",
-                23
-        ));
-        testExamples.add(new TestExampleLong(
-                "Number of membership relations",
-                "match $x isa membership; get $x; count;",
-                2121
-        ));
-        testExamples.add(new TestExampleLong(
-                "Number of teaching relations",
-                "match $x isa teaching; get $x; count;",
-                123
-        ));
-        testExamples.add(new TestExampleLong(
-                "Number of participation relations",
-                "match $x isa participation; get $x; count;",
-                1316
-        ));
+        Collection<TestQuantity> testExamples = new ArrayList<>();
+        testExamples.add(new TestQuantity("student", 915));
+        testExamples.add(new TestQuantity("teacher", 11));
+        testExamples.add(new TestQuantity("group", 190));
+        testExamples.add(new TestQuantity("result", 10));
+        testExamples.add(new TestQuantity("olympiad", 23));
+        testExamples.add(new TestQuantity("membership", 2121));
+        testExamples.add(new TestQuantity("teaching", 123));
+        testExamples.add(new TestQuantity("participation", 1316));
 
         TypeDBTransaction transaction = session.transaction(TypeDBTransaction.Type.READ);
         for (TestExampleLong example : testExamples) {
