@@ -189,6 +189,7 @@ public class DataLoader {
     }
 
     private static void createDatabase(String databaseName, TypeDBClient client) {
+        System.out.println("Database '" + databaseName + "' creating...");
         if (client.databases().contains(databaseName)) {
             System.out.println("Database '" + databaseName + "' exists, recreating...");
             client.databases().get(databaseName).delete();
@@ -242,7 +243,7 @@ public class DataLoader {
                 }
             }
         }
-        System.out.println("\nInserted " + items.size() + " items from [" + input.getDataPath() + "] into TypeDB.\n");
+        System.out.println("Inserted " + items.size() + " items from [" + input.getDataPath() + "] into TypeDB.\n");
     }
 
     static ArrayList<Json> parseDataToJson(Input input) throws FileNotFoundException {
