@@ -1,6 +1,6 @@
 build:
   correctness:
-    test-achievements-java:
+    test-data-loader:
       image: vaticle-ubuntu-22.04
       command: |
         bazel run //:typedb-extractor -- dist/typedb-all-linux

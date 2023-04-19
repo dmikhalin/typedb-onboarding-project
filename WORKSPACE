@@ -1,3 +1,5 @@
+workspace(name = "example")
+
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 RULES_JVM_EXTERNAL_TAG = "4.5"
@@ -34,3 +36,20 @@ maven_install(
         "https://repo.vaticle.com/repository/maven/",
     ],
 )
+
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+
+git_repository(
+    name = "vaticle_dependencies",
+    remote = "https://github.com/vaticle/dependencies",
+    commit = "a8b3b714a5e0562d41f4c05ca8f266d48b7d0fd3",
+)
+
+git_repository(
+    name = "vaticle_typedb_common",
+    remote = "https://github.com/vaticle/typedb-common",
+    commit = "f0dd708adaea9fe1fdc3699180797a12166d33e8"
+)
+
+load("@vaticle_dependencies//distribution:deps.bzl", "vaticle_bazel_distribution")
+vaticle_bazel_distribution()
