@@ -65,7 +65,7 @@ java_test(
         "@maven//:junit_junit_4_13_2",
         ":data-loader-lib",
     ],
-    resources = ["//resources:logback.xml"],
+    resources = ["//resources:logback.xml", "//resources:logback-test.xml"],
     resource_strip_prefix = "resources",
 )
 
