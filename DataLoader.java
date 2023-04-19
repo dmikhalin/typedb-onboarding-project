@@ -192,8 +192,8 @@ public class DataLoader {
         if (client.databases().contains(databaseName)) {
             System.out.println("Database '" + databaseName + "' exists, recreating...");
             client.databases().get(databaseName).delete();
-            client.databases().create(databaseName);
         }
+        client.databases().create(databaseName);
     }
 
     private static void defineSchema(String databaseName, String schemaFileName, TypeDBClient client) {
