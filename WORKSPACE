@@ -26,6 +26,7 @@ maven_install(
         "com.vaticle.typeql:typeql-lang:2.14.0",
         "org.sharegov:mjson:1.4.1",
         "com.univocity:univocity-parsers:2.9.1",
+        "junit:junit:4.13.2"
     ],
     repositories = [
         "https://maven.google.com",
