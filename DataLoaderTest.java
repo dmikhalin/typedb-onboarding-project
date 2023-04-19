@@ -1,10 +1,12 @@
 package com.example;
 
 import com.vaticle.typedb.client.api.TypeDBClient;
+import com.vaticle.typedb.client.api.TypeDBOptions;
 import com.vaticle.typedb.client.api.TypeDBSession;
 import com.vaticle.typedb.client.TypeDB;
 import com.vaticle.typedb.client.api.TypeDBTransaction;
 import com.vaticle.typeql.lang.TypeQL;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -94,5 +96,24 @@ public class DataLoaderTest {
             example.testQueryResult(transaction);
         }
         transaction.close();
+    }
+
+    @Test
+    public void assertRules() {
+        TestExampleLong example = new TestExampleLong(
+                "Number of ROI-2023 prize-winners",
+                "match $stud isa student; $olymp isa olympiad, has title 'ROI 2023'; " +
+                        "($stud, $olymp) isa prize-winning; get $stud; count;",
+                6
+        );
+        TypeDBTransaction transaction = session.transaction(TypeDBTransaction.Type.READ, TypeDBOptions.core().infer(true));
+        example.testQueryResult(transaction);
+        transaction.close();
+    }
+
+    @After
+    public void disconnect() {
+        session.close();
+        client.close();
     }
 }
