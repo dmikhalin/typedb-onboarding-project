@@ -1,0 +1,19 @@
+# Show the list of students that have right to participate in the Regional olympiad in a given year.
+
+match
+    $stud isa student, has name $st_n;
+    $olymp isa olympiad, has title $ol_t;
+    $pw ($stud, $olymp, $p) isa prize-winning;
+    $p has grade $gr;
+    {
+        $ol_t = "Regional olympiad in informatics 2022";
+        $gr < 11;
+    } 
+    or 
+    {
+        $ol_t = "Municipal olympiad in informatics 2022";
+        $gr > 8;
+    };
+get $st_n;
+sort $st_n;
+

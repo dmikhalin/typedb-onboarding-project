@@ -1,0 +1,13 @@
+# What teacher has the most number of regional-level olympiads prize-winners in a given year?
+
+match 
+    $stud isa student;
+    $gr isa group, has school-year "2022-2023";
+    $teach isa teacher, has name $tname;
+    ($stud, $gr) isa membership;
+    ($gr, $teach) isa teaching;
+    $olymp isa olympiad, has school-year "2022-2023", has level "regional";
+    ($stud, $olymp) isa prize-winning;
+group $tname;
+count;
+

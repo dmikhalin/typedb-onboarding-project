@@ -1,0 +1,9 @@
+# How successful in olympiads are students of different graduate years?
+
+match
+    $stud isa student, has graduate-year $year;
+    $olymp isa olympiad, has level != "school";
+    ($stud, $olymp) isa prize-winning;
+group $year;
+count;
+
