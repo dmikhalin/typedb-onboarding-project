@@ -1,4 +1,4 @@
-# Show the list of students that have right to participate in the Regional olympiad in a given year.
+# Show the list of students that have right to participate in the Regional olympiad in informatics 2023.
 
 match
     $stud isa student, has name $st_n;

@@ -1,4 +1,4 @@
-# What teacher has the most number of regional-level olympiads prize-winners in a given year?
+# What teacher has the most number of regional-level olympiads prize-winners in a 2022-2023 school year?
 
 match 
     $stud isa student;
