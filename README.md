@@ -26,7 +26,7 @@ Real data from one of the schools in Moscow (anonymized), originally stored in G
 
 1. What teacher has the most number of regional-level olympiads prize-winners in a 2022-2023 school year?
 
-**Query**: [query1.tql](studio-project/query1.tql)
+**Query**: [query1.tql](queries/query1.tql)
 
 **Answer**: Keith Stewart
 ```
@@ -41,7 +41,7 @@ Real data from one of the schools in Moscow (anonymized), originally stored in G
 
 2. Show the list of students that have right to participate in the Regional olympiad in informatics 2023.
 
-**Query**: [query2.tql](studio-project/query2.tql)
+**Query**: [query2.tql](queries/query2.tql)
 
 **Answer**:
 ```
@@ -105,7 +105,7 @@ Real data from one of the schools in Moscow (anonymized), originally stored in G
 
 3. How successful in olympiads are students of different graduate years?
 
-**Query**: [query3.tql](studio-project/query3.tql)
+**Query**: [query3.tql](queries/query3.tql)
 
 **Answer**:
 ```
